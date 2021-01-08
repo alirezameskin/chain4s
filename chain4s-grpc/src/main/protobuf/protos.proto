@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package chain4s.grpc;
+
+service ChainReplication {
+  rpc last(LastStateRequest) returns (LastStateResponse) {}
+  rpc append(AppendEntryRequest) returns (AppendEntryResponse) {}
+  rpc commit(CommitRequest) returns (CommitResponse) {}
+
+  rpc write(WriteRequest) returns (WriteResponse) {}
+  rpc read(ReadRequest) returns (ReadResponse) {}
+}
+
+message LastStateRequest { }
+message LastStateResponse {
+  uint64 index = 1;
+}
+
+message AppendEntryRequest {
+  uint64 index = 1;
+  bytes request = 2;
+}
+
+message AppendEntryResponse {}
+
+message CommitRequest {
+  uint64 index = 1;
+}
+message CommitResponse {}
+
+message WriteRequest {
+  SenderInfo sender = 1;
+  string requestId = 2;
+  bytes command = 3;
+}
+
+message WriteResponse {
+}
+
+message ReadRequest {
+  bytes command = 1;
+}
+
+message ReadResponse {
+  bytes result = 1;
+}
+
+message SenderInfo {
+  string host = 1;
+  int32 port = 2;
+}
+
+
