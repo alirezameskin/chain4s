@@ -1,4 +1,4 @@
-package chain4s.rpc
+package chain4s.rpc.member
 
 trait RpcServer[F[_]] {
   def start: F[Unit]

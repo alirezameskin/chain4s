@@ -3,8 +3,8 @@ package chain4s.effect.internal
 import cats.implicits._
 import cats.effect.{ContextShift, IO, Timer}
 import chain4s.internal.Logger
+import chain4s.rpc.member.RpcClient
 import chain4s.{LogEntry, SpeculativeLog}
-import chain4s.rpc.RpcClient
 import fs2.concurrent.{NoneTerminatedQueue, SignallingRef}
 import retry.retryingOnAllErrors
 

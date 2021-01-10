@@ -2,6 +2,7 @@ package chain4s.demo
 
 import cats.effect.IO
 import cats.effect.concurrent.Ref
+import chain4s.demo.command.{GetCommand, SetCommand}
 import chain4s.{ReadCommand, StableLog, WriteCommand}
 
 class StableLogImpl(itemsRef: Ref[IO, Map[String, String]]) extends StableLog[IO] {

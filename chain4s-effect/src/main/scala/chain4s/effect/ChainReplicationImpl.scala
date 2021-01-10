@@ -4,8 +4,9 @@ import cats.effect.concurrent.Ref
 import cats.effect.{ContextShift, IO, Timer}
 import chain4s.effect.internal.{ChangePropagatorImpl, ReplierImpl}
 import chain4s.internal._
-import chain4s.rpc.RpcClientBuilder
 import chain4s._
+import chain4s.rpc.member.RpcClientBuilder
+import chain4s.rpc.reply.RpcReplyClientBuilder
 
 class ChainReplicationImpl(
   val local: Node,
@@ -56,6 +57,17 @@ class ChainReplicationImpl(
       _          <- propagator.propagateCommit(index)
     } yield ()
 
+  override def write(request: WriteRequest): IO[Unit] =
+    CS.shift *> super.write(request)
+
+  override def read(request: ReadRequest): IO[request.RESULT] =
+    CS.shift *> super.read(request)
+
+  override def onAppend(entry: LogEntry): IO[Acknowledgment] =
+    CS.shift *> super.onAppend(entry)
+
+  override def onCommit(index: Long): IO[Unit] =
+    CS.shift *> super.onCommit(index)
 }
 
 object ChainReplicationImpl {
@@ -64,10 +76,11 @@ object ChainReplicationImpl {
     CS: ContextShift[IO],
     T: Timer[IO],
     L: Logger[IO],
-    CB: RpcClientBuilder[IO]
+    CB: RpcClientBuilder[IO],
+    RP: RpcReplyClientBuilder[IO]
   ): IO[ChainReplicationImpl] =
     for {
-      replier    <- IO(new ReplierImpl)
+      replier    <- IO(ReplierImpl.build)
       replica    <- IO(ChainReplication.detectReplica(node, config.nodes.toList))
       replicaRef <- Ref.of[IO, Replica](replica)
       propagator <- ChangePropagatorImpl.build(speculativeLog, replica.predecessor, replica.successor)

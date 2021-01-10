@@ -2,14 +2,16 @@ package chain4s.effect
 
 import cats.effect.{ContextShift, IO, Resource, Timer}
 import chain4s.internal.Logger
+import chain4s.rpc.reply.RpcReplyClientBuilder
 import chain4s.{Cluster, ClusterConfiguration, Configuration, SpeculativeLog, StableLog}
-import chain4s.rpc.{RpcClientBuilder, RpcServerBuilder}
+import chain4s.rpc.member.{RpcClientBuilder, RpcServerBuilder}
 
 object ReplicationCluster {
   def resource(config: Configuration, speculativeLog: SpeculativeLog[IO], stableLog: StableLog[IO])(implicit
     CS: ContextShift[IO],
     SB: RpcServerBuilder[IO],
     CB: RpcClientBuilder[IO],
+    RCB: RpcReplyClientBuilder[IO],
     T: Timer[IO],
     L: Logger[IO]
   ): Resource[IO, Cluster[IO]] =

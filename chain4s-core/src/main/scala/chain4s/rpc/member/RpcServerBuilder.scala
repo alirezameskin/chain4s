@@ -1,4 +1,4 @@
-package chain4s.rpc
+package chain4s.rpc.member
 
 import chain4s.{ChainReplication, Node}
 

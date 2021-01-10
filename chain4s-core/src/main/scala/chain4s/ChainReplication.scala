@@ -22,7 +22,7 @@ abstract class ChainReplication[F[_]: Monad]() {
   def write(request: WriteRequest): F[Unit] =
     for {
       entry   <- speculativeLog.create(request)
-      _       <- logger.trace(s"Creating log ${entry} on ${local}")
+      _       <- logger.trace(s"On ${local}: A Log entry created at index ${entry.index}")
       replica <- getCurrentState
       _       <- propagateOrCommit(replica, entry)
     } yield ()
@@ -54,7 +54,7 @@ abstract class ChainReplication[F[_]: Monad]() {
     for {
       entry <- speculativeLog.getEntry(index)
       _     <- stableLog.commit(entry.request.command)
-      _     <- logger.trace(s"${local}: Log entry ${entry} is committed")
+      _     <- logger.trace(s"On ${local}: Log Entry at ${index} is commited.")
     } yield ()
 
   def onConfiguration(config: ClusterConfiguration): F[Unit] =
@@ -63,7 +63,7 @@ abstract class ChainReplication[F[_]: Monad]() {
   private def doAppendRequest(entry: LogEntry): F[Acknowledgment] =
     for {
       entry   <- speculativeLog.append(entry)
-      _       <- logger.trace(s"${local}: Appending log ${entry}")
+      _       <- logger.trace(s"On ${local}: Appending a LogEntry index: ${entry.index}")
       replica <- getCurrentState
       _       <- propagateOrCommit(replica, entry)
     } yield Accepted(local, entry.index)

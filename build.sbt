@@ -54,19 +54,34 @@ lazy val grpc = (project in file("chain4s-grpc"))
   .dependsOn(core, effect)
   .aggregate(core)
 
-lazy val demo = (project in file("chain4s-demo"))
+lazy val proxy = (project in file("chain4s-proxy"))
   .dependsOn(core, effect, grpc)
   .aggregate(core, effect, grpc)
+  .settings(GlobalSettingsGroup)
+  .settings(
+    name := "chain4s-proxy",
+    moduleName := "chain4s-proxy",
+    publish := {},
+    publishLocal := {}
+  )
+
+lazy val demo = (project in file("chain4s-demo"))
+  .dependsOn(core, effect, proxy, grpc)
+  .aggregate(core, effect, proxy, grpc)
   .settings(GlobalSettingsGroup)
   .settings(
     name := "chain4s-demo",
     moduleName := "chain4s-demo",
     publish := {},
-    publishLocal := {}
+    publishLocal := {},
+    libraryDependencies ++= Seq(
+      "dev.profunktor" %% "console4cats" % "0.8.1",
+      "com.lihaoyi"    %% "fansi"        % "0.2.7"
+    )
   )
 
 lazy val root = (project in file("."))
-  .aggregate(core, effect, grpc, demo)
+  .aggregate(core, effect, grpc, proxy, demo)
   .settings(GlobalSettingsGroup)
   .settings(
     name := "chain4s",

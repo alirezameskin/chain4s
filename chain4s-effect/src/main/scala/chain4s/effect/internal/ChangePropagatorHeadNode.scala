@@ -1,10 +1,10 @@
 package chain4s.effect.internal
 
-import cats.implicits._
 import cats.effect.{ContextShift, IO, Timer}
+import cats.implicits._
 import chain4s.internal.Logger
+import chain4s.rpc.member.RpcClient
 import chain4s.{LogEntry, SpeculativeLog}
-import chain4s.rpc.RpcClient
 import fs2.concurrent.{Queue, SignallingRef}
 import retry.retryingOnAllErrors
 
@@ -24,7 +24,7 @@ class ChangePropagatorHeadNode(
 
   override def start: IO[Unit] = {
     val task = for {
-      last     <- client.last()
+      last     <- client.last
       iterator <- log.entriesAfter(last)
       _        <- queue.dequeue.evalMap(entry => client.send(entry)).interruptWhen(interrupter).compile.drain.start
       _        <- fs2.Stream.fromIterator[IO](iterator).through(queue.enqueue).compile.drain

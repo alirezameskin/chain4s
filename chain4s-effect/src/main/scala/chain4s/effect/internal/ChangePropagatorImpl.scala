@@ -2,7 +2,7 @@ package chain4s.effect.internal
 
 import cats.effect.{ContextShift, IO, Timer}
 import chain4s.internal.{ChangePropagator, Logger}
-import chain4s.rpc.RpcClientBuilder
+import chain4s.rpc.member.RpcClientBuilder
 import chain4s.{LogEntry, Node, SpeculativeLog}
 import fs2.concurrent.{Queue, SignallingRef}
 import retry.RetryDetails.{GivingUp, WillDelayAndRetry}
@@ -39,26 +39,26 @@ object ChangePropagatorImpl {
 
       case (Some(pred), Some(succ)) =>
         for {
-          predQueue <- Queue.unbounded[IO, Long]
-          succQueue <- Queue.unbounded[IO, LogEntry]
-          predClient = builder.build(pred)
-          succClient = builder.build(succ)
-          predFiber <- predQueue.dequeue.evalMap(index => predClient.commit(index)).compile.drain.start
-          succFiber <- succQueue.dequeue.evalMap(entry => succClient.send(entry)).compile.drain.start
-          signal    <- SignallingRef[IO, Boolean](false)
+          predQueue  <- Queue.unbounded[IO, Long]
+          succQueue  <- Queue.unbounded[IO, LogEntry]
+          predClient <- builder.build(pred)
+          succClient <- builder.build(succ)
+          predFiber  <- predQueue.dequeue.evalMap(index => predClient.commit(index)).compile.drain.start
+          succFiber  <- succQueue.dequeue.evalMap(entry => succClient.send(entry)).compile.drain.start
+          signal     <- SignallingRef[IO, Boolean](false)
         } yield new ChangePropagatorMidNode(log, predClient, predQueue, succClient, succQueue, signal)
 
       case (Some(pred), None) =>
         for {
-          queue <- Queue.noneTerminated[IO, Long]
-          client = builder.build(pred)
+          queue  <- Queue.noneTerminated[IO, Long]
+          client <- builder.build(pred)
           signal <- SignallingRef[IO, Boolean](false)
         } yield new ChangePropagatorTailNode(log, client, queue, signal)
 
       case (None, Some(succ)) =>
         for {
-          queue <- Queue.unbounded[IO, LogEntry]
-          client = builder.build(succ)
+          queue  <- Queue.unbounded[IO, LogEntry]
+          client <- builder.build(succ)
           signal <- SignallingRef[IO, Boolean](false)
         } yield new ChangePropagatorHeadNode(log, client, queue, signal)
     }

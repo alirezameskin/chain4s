@@ -1,13 +1,13 @@
-package chain4s.effect.grpc
+package chain4s.effect.grpc.member
 
 import cats.effect.IO
+import chain4s._
 import chain4s.grpc.protos
 import chain4s.grpc.serializer.Serializer
-import chain4s.{Address, ChainReplication, LogEntry, ReadRequest, WriteRequest}
 
 import scala.concurrent.Future
 
-private[grpc] class GRPCService(replication: ChainReplication[IO], serializer: Serializer)
+private[grpc] class GrpcServerService(replication: ChainReplication[IO], serializer: Serializer)
     extends protos.ChainReplicationGrpc.ChainReplication {
 
   override def last(request: protos.LastStateRequest): Future[protos.LastStateResponse] =

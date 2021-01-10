@@ -1,4 +1,4 @@
-package chain4s.demo
+package chain4s.demo.command
 
 import chain4s.WriteCommand
 

@@ -1,25 +1,25 @@
-package chain4s.effect.grpc
+package chain4s.effect.grpc.member
 
 import cats.effect.IO
 import chain4s.grpc.protos
 import chain4s.grpc.serializer.Serializer
-import chain4s.rpc.{RpcServer, RpcServerBuilder}
+import chain4s.rpc.member.{RpcServer, RpcServerBuilder}
 import chain4s.{ChainReplication, Node}
 import io.grpc.ServerBuilder
 
 import java.util.concurrent.TimeUnit
 import scala.concurrent.blocking
 
-class GRPCServerBuilder(implicit S: Serializer) extends RpcServerBuilder[IO] {
-  override def build(node: Node, raft: ChainReplication[IO]): IO[RpcServer[IO]] =
+class GrpcServerBuilder(implicit S: Serializer) extends RpcServerBuilder[IO] {
+  override def build(node: Node, replication: ChainReplication[IO]): IO[RpcServer[IO]] =
     IO.delay {
       val service = protos.ChainReplicationGrpc.bindService(
-        new GRPCService(raft, S),
+        new GrpcServerService(replication, S),
         scala.concurrent.ExecutionContext.global
       );
 
       val builder: ServerBuilder[_] = ServerBuilder
-        .forPort(node.port)
+        .forPort(node.address.port)
         .addService(service)
 
       val server = builder.build()

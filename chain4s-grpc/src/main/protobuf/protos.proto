@@ -11,6 +11,18 @@ service ChainReplication {
   rpc read(ReadRequest) returns (ReadResponse) {}
 }
 
+service ReplicationClient {
+  rpc reply(ReplyRequest) returns (ReplyResponse) {}
+}
+
+message ReplyRequest {
+  uint64  requestId = 1;
+  bytes result = 2;
+}
+
+message ReplyResponse {
+}
+
 message LastStateRequest { }
 message LastStateResponse {
   uint64 index = 1;
@@ -30,7 +42,7 @@ message CommitResponse {}
 
 message WriteRequest {
   SenderInfo sender = 1;
-  string requestId = 2;
+  uint64 requestId = 2;
   bytes command = 3;
 }
 
